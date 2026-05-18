@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-stone-50: #F5F0E8;
+  --color-stone-100: #E8DCC8;
+  --color-terracotta: #C0694A;
+  --color-terracotta-light: #D4876B;
+  --color-terracotta-dark: #A05238;
+  --color-charcoal: #2C2C2C;
+  --color-sage: #7A9E7E;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-stone-50);
+    color: var(--color-charcoal);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), serif;
+  }
+}

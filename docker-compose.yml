@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: ymmo_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ymmo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ymmo}
+      POSTGRES_DB: ${POSTGRES_DB:-ymmo}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ymmo} -d ${POSTGRES_DB:-ymmo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ymmo_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - uploads:/app/static/uploads
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ymmo_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    restart: on-failure
+
+volumes:
+  pgdata:
+  uploads:

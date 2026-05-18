@@ -1,0 +1,95 @@
+# =============================================================================
+# Environment & Secrets
+# =============================================================================
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.local.example
+
+# =============================================================================
+# Python / Flask (backend)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.lcov
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# =============================================================================
+# Next.js / Node (frontend)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build output
+.next/
+out/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# =============================================================================
+# Docker
+# =============================================================================
+# Ignore local override files but keep the main compose file
+docker-compose.override.yml
+
+# =============================================================================
+# IDEs & Editors
+# =============================================================================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# OS artifacts
+# =============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =============================================================================
+# Logs
+# =============================================================================
+*.log
+logs/
