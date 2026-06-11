@@ -11,58 +11,95 @@ Plateforme web centralisée pour l'achat et la vente de biens immobiliers, déve
 | Base de données | PostgreSQL 16 + PostGIS |
 | Analyse de données | pandas + scikit-learn |
 | Cartes | Leaflet / react-leaflet |
-| Déploiement | Docker Compose |
+| Déploiement | Windows Server (Bare-Metal) / PM2 |
 
-## Démarrage rapide
+## Démarrage rapide (Développement Local & Windows Server)
 
 ### Prérequis
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et démarré
+- **Python 3.12+** (avec pip)
+- **Node.js 20+** (avec npm)
+- **PostgreSQL 16+** installé et configuré (avec PostGIS)
 - Git
 
 ### Installation
 
-```bash
-# 1. Cloner le dépôt
+**1. Cloner le dépôt**
+```powershell
 git clone <url-du-repo>
 cd ymmo
+```
 
-# 2. Copier le fichier d'environnement
+**2. Base de données & Environnement**
+```powershell
+# Créer une base de données sur votre serveur PostgreSQL
+# Copier le fichier d'environnement
 cp .env.example .env
-# Éditer .env si nécessaire (les valeurs par défaut fonctionnent en local)
+# Éditer .env avec votre chaîne de connexion (DATABASE_URL=postgresql://user:pass@localhost:5432/ymmo)
+```
 
-# 3. Lancer tous les services
-docker compose up --build
+**3. Backend (FastAPI)**
+Ouvrir un terminal (PowerShell/CMD) :
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+# Appliquer les migrations
+alembic upgrade head
+
+# (Optionnel) Charger les données de démonstration
+python seed.py
+
+# Démarrer le serveur
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**4. Frontend (Next.js)**
+Ouvrir un nouveau terminal :
+```powershell
+cd frontend
+npm install
+
+# Démarrer le serveur de développement
+npm run dev
 ```
 
 Les services sont disponibles sur :
 - **Frontend** : http://localhost:3000
 - **Backend API** : http://localhost:8000
 - **Docs API (Swagger)** : http://localhost:8000/docs
-- **PostgreSQL** : localhost:5432
 
-### Migrations de base de données
+### Déploiement sur Windows Server (Production)
 
-```bash
-# Appliquer les migrations Alembic
-docker compose exec backend alembic upgrade head
-```
+Pour héberger l'application sur un serveur Windows sans Docker, nous recommandons **PM2** (via Node.js) pour gérer les processus en arrière-plan et s'assurer qu'ils redémarrent en cas de redémarrage de la VM.
 
-### Données de démonstration
+```powershell
+# 1. Installer PM2 globalement
+npm install -g pm2
 
-```bash
-# Charger les données de seed (12 agences, ~50 biens, tous les rôles)
-docker compose exec backend python seed.py
+# 2. Démarrer le Backend avec PM2
+cd backend
+pm2 start .\venv\Scripts\uvicorn.exe --name "ymmo-backend" -- app.main:app --host 0.0.0.0 --port 8000
+
+# 3. Compiler et démarrer le Frontend avec PM2
+cd ../frontend
+npm run build
+pm2 start npm --name "ymmo-frontend" -- run start
+
+# 4. Sauvegarder la configuration PM2 pour relancer au démarrage du serveur (utilisez pm2-installer pour Windows)
+pm2 save
 ```
 
 ### Tests
 
-```bash
-# Tests backend (pytest)
-docker compose exec backend pytest
+```powershell
+# Tests backend (depuis le dossier backend avec venv activé)
+pytest
 
-# Tests frontend (Jest)
-docker compose exec frontend npm test
+# Tests frontend (depuis le dossier frontend)
+npm test
 ```
 
 ## Structure du projet
@@ -81,15 +118,12 @@ ymmo/
 │   ├── alembic/
 │   ├── tests/
 │   ├── seed.py
-│   ├── requirements.txt
-│   └── Dockerfile
+│   └── requirements.txt
 ├── frontend/         # Next.js 14 App Router
 │   ├── app/
 │   ├── components/
 │   ├── lib/
-│   ├── package.json
-│   └── Dockerfile
-├── docker-compose.yml
+│   └── package.json
 ├── .env.example
 └── README.md
 ```

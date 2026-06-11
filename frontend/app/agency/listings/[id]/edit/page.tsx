@@ -54,7 +54,7 @@ export default function EditListingPage() {
   const [form, setForm] = useState<FormState | null>(null);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [geocoding, setGeocoding] = useState(false);
-  const [errors, setErrors] = useState<Partial<FormState>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);

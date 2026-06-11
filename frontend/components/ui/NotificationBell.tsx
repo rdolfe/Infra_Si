@@ -22,27 +22,44 @@ export default function NotificationBell() {
     api
       .get("/api/notifications")
       .then((r) => r.json())
-      .then((data: Notification[]) => setNotifications(data))
+      .then((data: unknown) => {
+        if (Array.isArray(data)) setNotifications(data as Notification[]);
+      })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     if (!open) return;
 
-    if (unreadCount > 0) {
-      api.put("/api/notifications/read-all", {}).then(() => {
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      });
-    }
-
     const handleOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [open, unreadCount]);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  function handleNotificationClick(id: string) {
+    const notification = notifications.find((n) => n.id === id);
+    if (!notification?.read) {
+      api
+        .put("/api/notifications/read", { id })
+        .then(() => {
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+          );
+        })
+        .catch(() => {});
+    }
+  }
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("fr-FR", {
@@ -88,7 +105,7 @@ export default function NotificationBell() {
 
       {open && (
         <div
-          role="menu"
+          aria-live="polite"
           className="absolute right-0 mt-2 w-80 bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden z-50"
         >
           <div className="px-4 py-3 border-b border-stone-100">
@@ -106,13 +123,15 @@ export default function NotificationBell() {
               {notifications.map((n) => (
                 <li
                   key={n.id}
-                  role="menuitem"
-                  className={`px-4 py-3 text-sm ${n.read ? "opacity-60" : "bg-stone-50"}`}
+                  onClick={() => handleNotificationClick(n.id)}
+                  className={`px-4 py-3 text-sm cursor-pointer hover:bg-stone-50 transition-colors ${
+                    n.read ? "opacity-60" : "bg-stone-50"
+                  }`}
                 >
                   <p className="font-medium text-charcoal capitalize">
                     {n.type.replace(/_/g, " ")}
                   </p>
-                  {n.payload.message && (
+                  {Boolean(n.payload.message) && (
                     <p className="text-charcoal-light mt-0.5 text-xs line-clamp-2">
                       {String(n.payload.message)}
                     </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Button from "@/components/ui/Button";
@@ -30,6 +31,18 @@ export default function FilterSidebar() {
   const [coupDeCoeur, setCoupDeCoeur] = useState(
     searchParams.get("coup_de_coeur") === "true"
   );
+
+  // FIX-16: sync local state whenever URL search params change (back/forward, external links)
+  useEffect(() => {
+    setCity(searchParams.get("city") ?? "");
+    setMinPrice(searchParams.get("min_price") ?? "");
+    setMaxPrice(searchParams.get("max_price") ?? "");
+    setMinSurface(searchParams.get("min_surface") ?? "");
+    setRooms(searchParams.get("rooms") ?? "");
+    setType(searchParams.get("type") ?? "");
+    setDpe(searchParams.get("dpe_rating") ?? "");
+    setCoupDeCoeur(searchParams.get("coup_de_coeur") === "true");
+  }, [searchParams]);
 
   function applyFilters() {
     const params = new URLSearchParams();
@@ -81,8 +94,11 @@ export default function FilterSidebar() {
           <div className="px-4 pb-4 space-y-4 border-t border-stone-100 pt-4">
             {/* City */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">Ville</label>
+              <label htmlFor="filter-city" className="text-xs font-medium text-charcoal">
+                Ville
+              </label>
               <input
+                id="filter-city"
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
@@ -93,8 +109,11 @@ export default function FilterSidebar() {
 
             {/* Type */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">Type de bien</label>
+              <label htmlFor="filter-type" className="text-xs font-medium text-charcoal">
+                Type de bien
+              </label>
               <select
+                id="filter-type"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="rounded-md border border-stone-200 px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta"
@@ -110,22 +129,30 @@ export default function FilterSidebar() {
 
             {/* Price range */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">Prix (€)</label>
+              <p className="text-xs font-medium text-charcoal" id="filter-price-label">
+                Prix (€)
+              </p>
               <div className="flex gap-2">
+                <label htmlFor="filter-min-price" className="sr-only">Prix minimum</label>
                 <input
+                  id="filter-min-price"
                   type="number"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   placeholder="Min"
                   min={0}
+                  aria-labelledby="filter-price-label"
                   className="w-1/2 rounded-md border border-stone-200 px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta"
                 />
+                <label htmlFor="filter-max-price" className="sr-only">Prix maximum</label>
                 <input
+                  id="filter-max-price"
                   type="number"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   placeholder="Max"
                   min={0}
+                  aria-labelledby="filter-price-label"
                   className="w-1/2 rounded-md border border-stone-200 px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta"
                 />
               </div>
@@ -133,8 +160,11 @@ export default function FilterSidebar() {
 
             {/* Surface */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">Surface min (m²)</label>
+              <label htmlFor="filter-min-surface" className="text-xs font-medium text-charcoal">
+                Surface min (m²)
+              </label>
               <input
+                id="filter-min-surface"
                 type="number"
                 value={minSurface}
                 onChange={(e) => setMinSurface(e.target.value)}
@@ -146,12 +176,13 @@ export default function FilterSidebar() {
 
             {/* Rooms */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">Pièces min</label>
-              <div className="flex gap-2">
+              <p className="text-xs font-medium text-charcoal">Pièces min</p>
+              <div className="flex gap-2" role="group" aria-label="Nombre de pièces minimum">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
                     onClick={() => setRooms(rooms === String(n) ? "" : String(n))}
+                    aria-pressed={rooms === String(n)}
                     className={`flex-1 py-1.5 rounded-md text-xs font-medium border transition-colors ${
                       rooms === String(n)
                         ? "bg-terracotta text-white border-terracotta"
@@ -166,12 +197,13 @@ export default function FilterSidebar() {
 
             {/* DPE */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-charcoal">DPE</label>
-              <div className="flex flex-wrap gap-1">
+              <p className="text-xs font-medium text-charcoal">DPE</p>
+              <div className="flex flex-wrap gap-1" role="group" aria-label="Classe DPE">
                 {DPE_OPTIONS.map((r) => (
                   <button
                     key={r}
                     onClick={() => setDpe(dpe === r ? "" : r)}
+                    aria-pressed={dpe === r}
                     className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
                       dpe === r
                         ? "bg-terracotta text-white"
@@ -185,8 +217,9 @@ export default function FilterSidebar() {
             </div>
 
             {/* Coup de cœur */}
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label htmlFor="filter-coup-de-coeur" className="flex items-center gap-2 cursor-pointer">
               <input
+                id="filter-coup-de-coeur"
                 type="checkbox"
                 checked={coupDeCoeur}
                 onChange={(e) => setCoupDeCoeur(e.target.checked)}

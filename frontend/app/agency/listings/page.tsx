@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 
 interface PropertyRow {
   id: string;
@@ -41,19 +42,25 @@ export default function AgencyListingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const LIMIT = 20;
 
   const user = auth.getUser();
 
-  async function loadListings() {
+  async function loadListings(p = page) {
     if (!user) return;
     setLoading(true);
     try {
+      const offset = (p - 1) * LIMIT;
       const res = await api.get(
-        `/api/properties?agent_id=${user.id}&limit=100`
+        `/api/properties?agent_id=${user.id}&limit=${LIMIT}&offset=${offset}`
       );
       if (!res.ok) throw new Error("Erreur lors du chargement.");
       const data = await res.json();
       setRows(data.items ?? []);
+      setTotal(data.total ?? 0);
     } catch {
       setError("Impossible de charger les annonces.");
     } finally {
@@ -62,18 +69,19 @@ export default function AgencyListingsPage() {
   }
 
   useEffect(() => {
-    loadListings();
-  }, []);
+    loadListings(page);
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleDelete(id: string) {
-    if (!confirm("Supprimer cette annonce ?")) return;
+    setConfirmingDeleteId(null);
     setDeletingId(id);
+    setError(null);
     try {
       const res = await api.delete(`/api/properties/${id}`);
       if (!res.ok) throw new Error();
       setRows((prev) => prev.filter((r) => r.id !== id));
     } catch {
-      alert("Impossible de supprimer l'annonce.");
+      setError("Impossible de supprimer l'annonce.");
     } finally {
       setDeletingId(null);
     }
@@ -83,6 +91,7 @@ export default function AgencyListingsPage() {
     const newStatus =
       row.status === "published" ? "draft" : "published";
     setTogglingId(row.id);
+    setError(null);
     try {
       const res = await api.put(`/api/properties/${row.id}`, {
         status: newStatus,
@@ -92,7 +101,7 @@ export default function AgencyListingsPage() {
         prev.map((r) => (r.id === row.id ? { ...r, status: newStatus } : r))
       );
     } catch {
-      alert("Impossible de changer le statut.");
+      setError("Impossible de changer le statut.");
     } finally {
       setTogglingId(null);
     }
@@ -105,6 +114,8 @@ export default function AgencyListingsPage() {
       </div>
     );
   }
+
+  const confirmingRow = rows.find((r) => r.id === confirmingDeleteId);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -182,6 +193,13 @@ export default function AgencyListingsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2 flex-wrap">
+                      <Link
+                        href={`/listings/${row.id}`}
+                        target="_blank"
+                        className="text-xs px-2 py-1 rounded border border-stone-200 text-charcoal hover:bg-stone-50"
+                      >
+                        Voir ↗
+                      </Link>
                       {row.status !== "sold" && (
                         <button
                           onClick={() => handleToggleStatus(row)}
@@ -202,7 +220,7 @@ export default function AgencyListingsPage() {
                         Éditer
                       </Link>
                       <button
-                        onClick={() => handleDelete(row.id)}
+                        onClick={() => setConfirmingDeleteId(row.id)}
                         disabled={deletingId === row.id}
                         className="text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                       >
@@ -216,6 +234,71 @@ export default function AgencyListingsPage() {
           </table>
         </div>
       )}
+
+      {Math.ceil(total / LIMIT) > 1 && (
+        <nav className="mt-6 flex items-center justify-center gap-2" aria-label="Pagination">
+          {page > 1 && (
+            <button
+              onClick={() => setPage((p) => p - 1)}
+              className="px-3 py-2 rounded-md text-sm border border-stone-200 text-charcoal hover:bg-stone-100 transition-colors"
+            >
+              ← Précédent
+            </button>
+          )}
+          {Array.from({ length: Math.ceil(total / LIMIT) }, (_, i) => i + 1)
+            .filter((p) => Math.abs(p - page) <= 2)
+            .map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`px-3 py-2 rounded-md text-sm border transition-colors ${
+                  p === page
+                    ? "bg-terracotta text-white border-terracotta"
+                    : "border-stone-200 text-charcoal hover:bg-stone-100"
+                }`}
+                aria-current={p === page ? "page" : undefined}
+              >
+                {p}
+              </button>
+            ))}
+          {page < Math.ceil(total / LIMIT) && (
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              className="px-3 py-2 rounded-md text-sm border border-stone-200 text-charcoal hover:bg-stone-100 transition-colors"
+            >
+              Suivant →
+            </button>
+          )}
+        </nav>
+      )}
+
+      <Modal
+        open={confirmingDeleteId !== null}
+        onClose={() => setConfirmingDeleteId(null)}
+        title="Confirmer la suppression"
+      >
+        <p className="text-sm text-charcoal-light mb-6">
+          Voulez-vous vraiment supprimer{" "}
+          <span className="font-medium text-charcoal">
+            {confirmingRow?.title ?? "cette annonce"}
+          </span>{" "}
+          ? Cette action est irréversible.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmingDeleteId(null)}
+          >
+            Annuler
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => confirmingDeleteId && handleDelete(confirmingDeleteId)}
+          >
+            Supprimer
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export default function OfferModal({
         setPrice("");
         setMessage("");
         onClose();
-      }, 1500);
+      }, 2500);
     } catch {
       setError("Impossible de soumettre l'offre. Vérifiez votre connexion.");
     } finally {
@@ -83,6 +83,14 @@ export default function OfferModal({
           <p className="text-sm text-charcoal-light mt-1">
             L'agent va être notifié de votre proposition.
           </p>
+          <Button variant="ghost" size="sm" className="mt-4" onClick={() => {
+            setSuccess(false);
+            setPrice("");
+            setMessage("");
+            onClose();
+          }}>
+            Fermer
+          </Button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,7 +102,7 @@ export default function OfferModal({
             label="Votre offre (€)"
             type="number"
             min="1"
-            step="1000"
+            step="1"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Ex : 250000"

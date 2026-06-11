@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { DpeBadge } from "@/components/ui/Badge";
 
 export interface PhotoSummary {
@@ -56,11 +57,12 @@ export default function PropertyCard({
       className="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-stone-100"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
-        <img
+        <Image
           src={imageUrl}
           alt={property.title}
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {property.coup_de_coeur && (
           <div className="absolute top-2 left-2 bg-terracotta text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">

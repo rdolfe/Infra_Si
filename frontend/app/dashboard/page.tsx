@@ -41,7 +41,9 @@ export default function DashboardPage() {
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [loadingThreads, setLoadingThreads] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [offersError, setOffersError] = useState<string | null>(null);
+  const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const [threadsError, setThreadsError] = useState<string | null>(null);
 
   const user = auth.getUser();
 
@@ -52,8 +54,11 @@ export default function DashboardPage() {
     }
     if (user.role !== "client") {
       router.replace("/");
+      return;
     }
-  }, []);
+    // Load threads on mount to populate the unread badge
+    loadThreads();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user || user.role !== "client") return;
@@ -64,13 +69,13 @@ export default function DashboardPage() {
 
   async function loadOffers() {
     setLoadingOffers(true);
-    setError(null);
+    setOffersError(null);
     try {
       const res = await api.get("/api/offers");
       if (!res.ok) throw new Error();
       setOffers(await res.json());
     } catch {
-      setError("Impossible de charger vos offres.");
+      setOffersError("Impossible de charger vos offres.");
     } finally {
       setLoadingOffers(false);
     }
@@ -78,13 +83,13 @@ export default function DashboardPage() {
 
   async function loadFavorites() {
     setLoadingFavorites(true);
-    setError(null);
+    setFavoritesError(null);
     try {
       const res = await api.get("/api/properties/favorites/list");
       if (!res.ok) throw new Error();
       setFavorites(await res.json());
     } catch {
-      setError("Impossible de charger vos favoris.");
+      setFavoritesError("Impossible de charger vos favoris.");
     } finally {
       setLoadingFavorites(false);
     }
@@ -92,19 +97,37 @@ export default function DashboardPage() {
 
   async function loadThreads() {
     setLoadingThreads(true);
-    setError(null);
+    setThreadsError(null);
     try {
       const res = await api.get("/api/messages/threads");
+      if (res.status === 404) {
+        // Endpoint not yet available — derive threads from the offers list
+        const offersRes = await api.get("/api/offers");
+        if (!offersRes.ok) throw new Error();
+        const offerList: OfferSummary[] = await offersRes.json();
+        setThreads(
+          offerList.map((o) => ({
+            offer_id: o.id,
+            property_id: o.property_id,
+            last_message: "Voir la conversation →",
+            last_message_at: o.created_at,
+            unread_count: 0,
+          }))
+        );
+        return;
+      }
       if (!res.ok) throw new Error();
       setThreads(await res.json());
     } catch {
-      setError("Impossible de charger vos messages.");
+      setThreadsError("Impossible de charger vos messages.");
     } finally {
       setLoadingThreads(false);
     }
   }
 
   if (!user || user.role !== "client") return null;
+
+  const totalUnread = threads.reduce((sum, t) => sum + t.unread_count, 0);
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -117,31 +140,43 @@ export default function DashboardPage() {
         </p>
 
         <div className="border-b border-stone-200 mb-6">
-          <nav className="flex gap-1" aria-label="Onglets tableau de bord">
+          <div role="tablist" aria-label="Tableau de bord" className="flex gap-1">
             {(["offers", "favorites", "messages"] as Tab[]).map((tab) => (
               <button
                 key={tab}
+                role="tab"
+                aria-selected={activeTab === tab}
+                aria-controls={`panel-${tab}`}
+                id={`tab-${tab}`}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                className={`inline-flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                   activeTab === tab
                     ? "border-terracotta text-terracotta"
                     : "border-transparent text-charcoal-light hover:text-charcoal"
                 }`}
               >
                 {TAB_LABELS[tab]}
+                {tab === "messages" && totalUnread > 0 && (
+                  <span className="bg-terracotta text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center leading-none">
+                    {totalUnread}
+                  </span>
+                )}
               </button>
             ))}
-          </nav>
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
         {activeTab === "offers" && (
-          <section aria-label="Mes offres">
+          <section
+            role="tabpanel"
+            id="panel-offers"
+            aria-labelledby="tab-offers"
+          >
+            {offersError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+                {offersError}
+              </div>
+            )}
             {loadingOffers ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
@@ -175,7 +210,12 @@ export default function DashboardPage() {
         )}
 
         {activeTab === "favorites" && (
-          <section aria-label="Mes favoris">
+          <section role="tabpanel" id="panel-favorites" aria-labelledby="tab-favorites">
+            {favoritesError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+                {favoritesError}
+              </div>
+            )}
             {loadingFavorites ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -203,7 +243,12 @@ export default function DashboardPage() {
         )}
 
         {activeTab === "messages" && (
-          <section aria-label="Mes messages">
+          <section role="tabpanel" id="panel-messages" aria-labelledby="tab-messages">
+            {threadsError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+                {threadsError}
+              </div>
+            )}
             {loadingThreads ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (

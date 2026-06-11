@@ -1,25 +1,48 @@
-import Link from "next/link";
+"use client";
 
-const LINKS = {
-  Découvrir: [
-    { label: "Annonces", href: "/listings" },
-    { label: "Carte des prix", href: "/map" },
-    { label: "Coups de cœur", href: "/listings?coup_de_coeur=true" },
-  ],
-  "Mon compte": [
-    { label: "Connexion", href: "/login" },
-    { label: "Créer un compte", href: "/register" },
-    { label: "Mon espace", href: "/dashboard" },
-  ],
-  Agences: [
-    { label: "Paris", href: "/listings?city=Paris" },
-    { label: "Lyon", href: "/listings?city=Lyon" },
-    { label: "Marseille", href: "/listings?city=Marseille" },
-    { label: "Bordeaux", href: "/listings?city=Bordeaux" },
-  ],
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { auth } from "@/lib/auth";
+
+const ROLE_DASHBOARD: Record<string, string> = {
+  client: "/dashboard",
+  agent: "/agency/listings",
+  admin: "/admin",
 };
 
+const DISCOVER_LINKS = [
+  { label: "Annonces", href: "/listings" },
+  { label: "Carte des prix", href: "/map" },
+  { label: "Coups de cœur", href: "/listings?coup_de_coeur=true" },
+];
+
+const AGENCY_LINKS = [
+  { label: "Paris", href: "/listings?city=Paris" },
+  { label: "Lyon", href: "/listings?city=Lyon" },
+  { label: "Marseille", href: "/listings?city=Marseille" },
+  { label: "Bordeaux", href: "/listings?city=Bordeaux" },
+];
+
 export default function Footer() {
+  const [user, setUser] = useState<{ role: string } | null>(null);
+
+  useEffect(() => {
+    setUser(auth.getUser());
+  }, []);
+
+  const accountLinks = user
+    ? [{ label: "Mon espace", href: ROLE_DASHBOARD[user.role] ?? "/dashboard" }]
+    : [
+        { label: "Connexion", href: "/login" },
+        { label: "Créer un compte", href: "/register" },
+      ];
+
+  const sections: { title: string; links: { label: string; href: string }[] }[] = [
+    { title: "Découvrir", links: DISCOVER_LINKS },
+    { title: "Mon compte", links: accountLinks },
+    { title: "Agences", links: AGENCY_LINKS },
+  ];
+
   return (
     <footer className="bg-charcoal text-white mt-auto">
       <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -34,13 +57,13 @@ export default function Footer() {
             </p>
           </div>
 
-          {Object.entries(LINKS).map(([section, items]) => (
-            <div key={section}>
+          {sections.map(({ title, links }) => (
+            <div key={title}>
               <h3 className="font-inter font-semibold text-sm text-white/90 uppercase tracking-wider mb-3">
-                {section}
+                {title}
               </h3>
               <ul className="space-y-2">
-                {items.map((item) => (
+                {links.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}

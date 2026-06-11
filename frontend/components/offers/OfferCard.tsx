@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
+import Image from "next/image";
 
 export interface OfferSummary {
   id: string;
@@ -57,12 +58,13 @@ export default function OfferCard({ offer, actions }: OfferCardProps) {
 
   return (
     <div className="flex items-start gap-4 bg-white rounded-xl border border-stone-100 shadow-sm p-4">
-      <div className="w-20 h-20 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
-        <img
+      <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+        <Image
           src={photoUrl}
           alt={offer.property_title ?? "Bien immobilier"}
-          className="w-full h-full object-cover"
-          loading="lazy"
+          fill
+          sizes="80px"
+          className="object-cover"
         />
       </div>
 

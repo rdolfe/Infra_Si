@@ -13,6 +13,14 @@ function isClient() {
 }
 
 async function login(email: string, password: string): Promise<AuthUser> {
+  // Purge any existing session before logging in a new user
+  if (isClient()) {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("ymmo_user");
+    document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
+  }
+
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

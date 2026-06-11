@@ -189,6 +189,84 @@ PROPERTY_TEMPLATES = [
 # First 8 listings will be coup de cœur
 COUP_DE_COEUR_INDICES = {0, 1, 4, 7, 9, 16, 27, 28}
 
+# Image URLs per property type (Pexels, stable direct links, no API key needed)
+PROPERTY_IMAGE_URLS = {
+    PropertyType.apartment: [
+        # Modern interiors — living rooms, kitchens, bedrooms
+        "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/2029694/pexels-photo-2029694.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1732414/pexels-photo-1732414.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.house: [
+        # Residential exteriors with gardens, varied architectural styles
+        "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/209296/pexels-photo-209296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1029599/pexels-photo-1029599.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1846400/pexels-photo-1846400.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1454496/pexels-photo-1454496.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1568605/pexels-photo-1568605.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/279810/pexels-photo-279810.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1825206/pexels-photo-1825206.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.villa: [
+        # Luxury exteriors, pools, panoramic views — no apartment interior sharing
+        "https://images.pexels.com/photos/261169/pexels-photo-261169.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1268869/pexels-photo-1268869.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/2724748/pexels-photo-2724748.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1560707/pexels-photo-1560707.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1546168/pexels-photo-1546168.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/1643384/pexels-photo-1643384.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.studio: [
+        # Compact, cozy single-room spaces — distinct from full apartment photos
+        "https://images.pexels.com/photos/1454805/pexels-photo-1454805.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3144580/pexels-photo-3144580.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/439227/pexels-photo-439227.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/545012/pexels-photo-545012.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/2029679/pexels-photo-2029679.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/584399/pexels-photo-584399.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.office: [
+        # Professional workspaces and open-plan offices
+        "https://images.pexels.com/photos/380768/pexels-photo-380768.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/416320/pexels-photo-416320.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3962571/pexels-photo-3962571.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3971464/pexels-photo-3971464.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3808517/pexels-photo-3808517.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.retail: [
+        # Storefronts and commercial interiors
+        "https://images.pexels.com/photos/1579541/pexels-photo-1579541.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3962286/pexels-photo-3962286.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/5632399/pexels-photo-5632399.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3945683/pexels-photo-3945683.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3974632/pexels-photo-3974632.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/4065618/pexels-photo-4065618.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+    PropertyType.warehouse: [
+        # Industrial and logistics spaces
+        "https://images.pexels.com/photos/1267338/pexels-photo-1267338.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/236698/pexels-photo-236698.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/2559827/pexels-photo-2559827.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/5632413/pexels-photo-5632413.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3945682/pexels-photo-3945682.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/4481542/pexels-photo-4481542.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+        "https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+    ],
+}
+
 
 def run_seed():
     db = SessionLocal()
@@ -312,18 +390,19 @@ def run_seed():
         print(f"  {len(prop_objects)} properties inserted.")
 
         # ------------------------------------------------------------------ #
-        # Photos (2–4 per property using picsum)
+        # Photos (2–4 per property using Pexels)
         # ------------------------------------------------------------------ #
         print("Inserting photos…")
         photo_count = 0
         for i, prop in enumerate(prop_objects):
             n_photos = 2 + (i % 3)  # 2, 3, or 4
+            photo_urls = PROPERTY_IMAGE_URLS.get(prop.type, PROPERTY_IMAGE_URLS[PropertyType.apartment])
             for order in range(n_photos):
-                seed_val = i * 10 + order
+                photo_url = photo_urls[order % len(photo_urls)]
                 photo = Photo(
                     id=uid(),
                     property_id=prop.id,
-                    url=f"https://picsum.photos/seed/{seed_val}/800/600",
+                    url=photo_url,
                     display_order=order,
                 )
                 db.add(photo)

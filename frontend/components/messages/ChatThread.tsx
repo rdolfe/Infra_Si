@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
@@ -33,24 +33,31 @@ export default function ChatThread({ offerId }: ChatThreadProps) {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
   const currentUser = auth.getUser();
 
-  async function loadMessages() {
+  const loadMessages = useCallback(async () => {
     try {
       const res = await api.get(`/api/messages?offer_id=${offerId}`);
       if (!res.ok) throw new Error();
       const data: Message[] = await res.json();
-      setMessages(data);
+      setMessages((prev) => (data.length === prev.length ? prev : data));
     } catch {
       setError("Impossible de charger les messages.");
     } finally {
       setLoading(false);
     }
-  }
+  }, [offerId]);
 
   useEffect(() => {
     loadMessages();
-  }, [offerId]);
+
+    const interval = setInterval(() => {
+      if (!sendingRef.current) loadMessages();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [loadMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,6 +67,7 @@ export default function ChatThread({ offerId }: ChatThreadProps) {
     e.preventDefault();
     if (!draft.trim()) return;
     setSending(true);
+    sendingRef.current = true;
     try {
       const res = await api.post("/api/messages", {
         offer_id: offerId,
@@ -73,6 +81,7 @@ export default function ChatThread({ offerId }: ChatThreadProps) {
       setError("Impossible d'envoyer le message.");
     } finally {
       setSending(false);
+      sendingRef.current = false;
     }
   }
 

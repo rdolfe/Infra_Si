@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface Photo {
   id: string;
@@ -37,12 +38,23 @@ export default function PhotoGallery({
   const next = () => setCurrent((i) => (i + 1) % photos.length);
 
   return (
-    <div className="relative w-full aspect-video bg-stone-100 rounded-xl overflow-hidden">
-      <img
+    <div
+      className="relative w-full aspect-video bg-stone-100 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta"
+      tabIndex={0}
+      aria-label={`Galerie de photos — photo ${current + 1} sur ${photos.length}`}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft") prev();
+        if (e.key === "ArrowRight") next();
+      }}
+    >
+      <Image
         key={photos[current].id}
         src={resolveUrl(photos[current].url)}
         alt={`${title} — photo ${current + 1}`}
-        className="w-full h-full object-cover"
+        fill
+        sizes="(max-width: 1024px) 100vw, 66vw"
+        className="object-cover"
+        priority={current === 0}
       />
 
       {photos.length > 1 && (

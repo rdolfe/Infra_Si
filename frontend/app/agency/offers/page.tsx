@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import Button from "@/components/ui/Button";
@@ -108,31 +109,39 @@ export default function AgencyOffersPage() {
                       key={offer.id}
                       offer={offer}
                       actions={
-                        isActionable ? (
-                          <>
-                            <Button
-                              variant="primary"
-                              onClick={() => handleAction(offer.id, "accept")}
-                              disabled={actionLoading !== null}
-                            >
-                              {actionLoading === offer.id + "accept" ? "…" : "Accepter"}
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              onClick={() => setCounterOfferId(offer.id)}
-                              disabled={actionLoading !== null}
-                            >
-                              Contre-offre
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleAction(offer.id, "reject")}
-                              disabled={actionLoading !== null}
-                            >
-                              {actionLoading === offer.id + "reject" ? "…" : "Refuser"}
-                            </Button>
-                          </>
-                        ) : undefined
+                        <>
+                          {isActionable && (
+                            <>
+                              <Button
+                                variant="primary"
+                                onClick={() => handleAction(offer.id, "accept")}
+                                disabled={actionLoading !== null}
+                              >
+                                {actionLoading === offer.id + "accept" ? "…" : "Accepter"}
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                onClick={() => setCounterOfferId(offer.id)}
+                                disabled={actionLoading !== null}
+                              >
+                                Contre-offre
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                onClick={() => handleAction(offer.id, "reject")}
+                                disabled={actionLoading !== null}
+                              >
+                                {actionLoading === offer.id + "reject" ? "…" : "Refuser"}
+                              </Button>
+                            </>
+                          )}
+                          <Link
+                            href={`/agency/offers/${offer.id}`}
+                            className="text-xs px-2 py-1 rounded border border-stone-200 text-charcoal hover:bg-stone-50"
+                          >
+                            Conversation →
+                          </Link>
+                        </>
                       }
                     />
                   );

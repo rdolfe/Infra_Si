@@ -249,7 +249,7 @@ export default function OfferDetailPage() {
           </div>
 
           {/* Middle panel — Chat */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col min-h-[480px]">
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col h-[560px]">
             {offer && <ChatThread offerId={offer.id} />}
           </div>
 

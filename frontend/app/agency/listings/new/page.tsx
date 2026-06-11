@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -57,8 +57,10 @@ export default function NewListingPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(INITIAL);
   const [photos, setPhotos] = useState<File[]>([]);
+  const objectUrls = useMemo(() => photos.map((f) => URL.createObjectURL(f)), [photos]);
+  useEffect(() => () => objectUrls.forEach(URL.revokeObjectURL), [objectUrls]);
   const [geocoding, setGeocoding] = useState(false);
-  const [errors, setErrors] = useState<Partial<FormState>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -177,9 +179,10 @@ export default function NewListingPage() {
         {STEPS.map((label, i) => (
           <div key={label} className="flex items-center gap-2 flex-1">
             <div
+              onClick={() => { if (i < step) setStep(i); }}
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                 i < step
-                  ? "bg-terracotta text-white"
+                  ? "bg-terracotta text-white cursor-pointer hover:opacity-80 transition-opacity"
                   : i === step
                   ? "bg-terracotta text-white ring-2 ring-terracotta ring-offset-2"
                   : "bg-stone-100 text-charcoal-light"
@@ -200,8 +203,8 @@ export default function NewListingPage() {
           <div className="space-y-4">
             <Input label="Titre" value={form.title} onChange={(e) => set("title", e.target.value)} error={errors.title} placeholder="Ex : Appartement lumineux 3 pièces" required />
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-charcoal font-inter">Description <span className="text-red-500">*</span></label>
-              <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} className={`rounded-md border px-3 py-2 text-sm text-charcoal font-inter focus:outline-none focus:ring-2 focus:ring-terracotta resize-none ${errors.description ? "border-red-500" : "border-stone-200"}`} placeholder="Décrivez le bien…" />
+              <label htmlFor="new-listing-description" className="text-sm font-medium text-charcoal font-inter">Description <span className="text-red-500">*</span></label>
+              <textarea id="new-listing-description" value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} className={`rounded-md border px-3 py-2 text-sm text-charcoal font-inter focus:outline-none focus:ring-2 focus:ring-terracotta resize-none ${errors.description ? "border-red-500" : "border-stone-200"}`} placeholder="Décrivez le bien…" />
               {errors.description && <p className="text-xs text-red-600">{errors.description}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -284,10 +287,10 @@ export default function NewListingPage() {
             />
             {photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
-                {photos.map((file, i) => (
+                {objectUrls.map((url, i) => (
                   <div key={i} className="aspect-[4/3] bg-stone-100 rounded-lg overflow-hidden">
                     <img
-                      src={URL.createObjectURL(file)}
+                      src={url}
                       alt={`Photo ${i + 1}`}
                       className="w-full h-full object-cover"
                     />

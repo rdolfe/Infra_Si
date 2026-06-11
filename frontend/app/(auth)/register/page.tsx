@@ -4,11 +4,13 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +21,8 @@ export default function RegisterPage() {
   const validate = (): string | null => {
     if (!name.trim()) return "Le nom est requis";
     if (!email.trim()) return "L'adresse e-mail est requise";
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(email)) return "Adresse e-mail invalide";
     if (password.length < 8) return "Le mot de passe doit contenir au moins 8 caractères";
     if (password !== confirm) return "Les mots de passe ne correspondent pas";
     return null;
@@ -36,7 +40,8 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      await auth.register(name, email, password);
+      const user = await auth.register(name, email, password);
+      setUser(user);
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erreur lors de l'inscription");

@@ -16,7 +16,11 @@ function buildPageUrl(
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(searchParams)) {
     if (key === "page") continue;
-    if (value !== undefined) params.set(key, String(value));
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, v));
+    } else if (value !== undefined) {
+      params.set(key, String(value));
+    }
   }
   params.set("page", String(newPage));
   return `/listings?${params.toString()}`;

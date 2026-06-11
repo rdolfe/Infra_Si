@@ -2,8 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
@@ -14,8 +15,10 @@ const ROLE_REDIRECTS: Record<string, string> = {
   visitor: "/",
 };
 
-export default function LoginPage() {
+function LoginPageContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +31,13 @@ export default function LoginPage() {
 
     try {
       const user = await auth.login(email, password);
-      router.push(ROLE_REDIRECTS[user.role] ?? "/");
+      setUser(user);
+      const next = searchParams.get("next");
+      const destination =
+        next && next.startsWith("/") && !next.startsWith("//")
+          ? next
+          : ROLE_REDIRECTS[user.role] ?? "/";
+      router.push(destination);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
     } finally {
@@ -60,15 +69,25 @@ export default function LoginPage() {
               placeholder="vous@exemple.fr"
             />
 
-            <Input
-              label="Mot de passe"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+            <div>
+              <Input
+                label="Mot de passe"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+              />
+              <div className="text-right mt-1">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-charcoal-light hover:text-terracotta transition-colors"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
+            </div>
 
             {error && (
               <p role="alert" className="text-sm text-red-600 bg-red-50 rounded-md px-3 py-2">
@@ -99,5 +118,15 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
   );
 }

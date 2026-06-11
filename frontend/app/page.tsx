@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Image from "next/image";
 import PropertyCard, { PropertySummary } from "@/components/property/PropertyCard";
 import { SERVER_API_URL } from "@/lib/server-fetch";
 
@@ -37,11 +39,12 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="relative bg-charcoal text-white overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{
-            backgroundImage: "url('https://picsum.photos/seed/ymmo-hero/1600/900')",
-          }}
+        <Image
+          src="https://picsum.photos/seed/ymmo-hero/1600/900"
+          alt=""
+          fill
+          priority
+          className="object-cover opacity-30"
           aria-hidden="true"
         />
         <div className="relative max-w-content mx-auto px-4 py-24 md:py-36 text-center">
@@ -95,7 +98,7 @@ export default async function HomePage() {
           <p className="text-charcoal-light mb-8">
             Une sélection de biens d'exception choisis par nos agents.
           </p>
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
+          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory">
             {featuredProperties.map((property) => (
               <div
                 key={property.id}
@@ -119,8 +122,9 @@ export default async function HomePage() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {AGENCIES.map((agency) => (
-              <div
+              <Link
                 key={agency.city}
+                href={`/listings?city=${encodeURIComponent(agency.city)}`}
                 className="bg-white rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="w-10 h-10 bg-terracotta/10 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -146,7 +150,7 @@ export default async function HomePage() {
                 </div>
                 <p className="text-sm font-medium text-charcoal">{agency.name}</p>
                 <p className="text-xs text-charcoal-light">{agency.city}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
