@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.analytics.heatmap import compute_heatmap
 from app.analytics.hot_zones import compute_hot_zones
+from app.analytics.price_prediction import predict_price, find_deals
 from app.core.database import get_db
 from app.schemas.analytics import HotZone
 
@@ -33,3 +34,23 @@ def get_heatmap(db: Session = Depends(get_db)):
 @router.get("/hot-zones", response_model=list[HotZone])
 def get_hot_zones(db: Session = Depends(get_db)):
     return _cached("hot_zones", compute_hot_zones, db)
+
+
+@router.get("/price-estimate")
+def price_estimate(
+    surface: float,
+    rooms: int,
+    type: str,
+    lat: float,
+    lng: float,
+    db: Session = Depends(get_db),
+):
+    return predict_price(
+        db, surface=surface, rooms=rooms,
+        property_type=type, lat=lat, lng=lng,
+    )
+
+
+@router.get("/deals")
+def deals(db: Session = Depends(get_db)):
+    return _cached("deals", find_deals, db)
